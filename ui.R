@@ -3,6 +3,7 @@ library(shiny)
 library(shinydashboard)
 
 shinyUI(dashboardPage(
+    skin = "black",
     dashboardHeader(title = "PER what?"),
     dashboardSidebar(
         
@@ -30,9 +31,14 @@ shinyUI(dashboardPage(
             #tabItem(tabName = "data",
             #        fluidRow(box(DT::dataTableOutput("table"), width = 12))),
             tabItem(tabName = "tabPER_DBPM",
-                    fluidRow(plotlyOutput("scatPERvsDBPM"))),
-            tabItem(tabName = "data",
-                    fluidRow(dataTableOutput("tbl30plusPER"), width = 12))
+                    fluidRow(box(plotlyOutput("scatPERvsDBPM"),width = 12))),
+            tabItem(
+              tagList(
+                singleton(tags$head(tags$script(src='//cdn.datatables.net/fixedheader/2.1.2/js/dataTables.fixedHeader.min.js',type='text/javascript'))),
+                singleton(tags$head(tags$link(href='//cdn.datatables.net/fixedheader/2.1.2/css/dataTables.fixedHeader.css',rel='stylesheet',type='text/css')))
+              ),
+              tabName = "data",
+              fluidRow(box(dataTableOutput("tbl30plusPER"), width = 12)))
             
             )
         )

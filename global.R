@@ -10,6 +10,7 @@ library(plotly)
 library(DT)
 library(shiny)
 library(googleVis)
+library(data.table)
 
 
 ####get geo data
@@ -27,11 +28,13 @@ for(i in 1:length(json_data$resources$datahub$type)){
   }
 }
 
-#first checking out players.csv, which shows player personal info, such as measurements and birth info.
+#NBA players historical data from Kaggle - primary source https://www.basketball-reference.com
 players_df = read.csv("Players.csv", stringsAsFactors = F)
 bball_info = read.csv("player_data.csv", stringsAsFactors = F)
 season_stats = read.csv("Seasons_Stats.csv", stringsAsFactors = F)
 
+
+###############place functions in the new helpers.R file
 #weight coversion == kg to lbs
 kg_2_lbs = function(kg){
   kg * 2.205
@@ -48,8 +51,10 @@ cm_2_inches = function(cm){
 players_df %>%
   rename(college = collage) 
 
-players_df %>% 
-  distinct(birth_state)
+#get rid of blank rows in seasons data set
+season_stats = season_stats %>% 
+  filter(str_length(Pos)>0)
+
 
 ####enhancements
 ###column enhancements to players_df
@@ -59,6 +64,20 @@ players_df = players_df %>%
   mutate("weight_lbs" = kg_2_lbs(weight_kg)) %>% 
   mutate("height_inches" = cm_2_inches(height_cm))
 
+
+
+### position classifiers
+season_stats = season_stats %>% 
+  mutate(Pos_modern = 
+           case_when(
+             substr(Pos, 1, 2) == "PG" ~ "PG",
+             substr(Pos, 1, 3) == "F-C" ~ "Big",
+             substr(Pos, 1, 2) == "PF" ~ "Big",
+             substr(Pos, 1, 2) == "C" ~ "Big",
+             substr(Pos, 1, 2) == "C-" ~ "Big",
+             TRUE ~ "Wing"
+           )
+  ) 
 
 
 
@@ -75,49 +94,64 @@ states_usa = read.csv("states_usa.csv")
 #data subsets
 
 stats_25plusPER = season_stats %>%
-  select(Year,Player,PER,MP,PTS,G,Pos,DBPM,WS,BPM) %>%
+  select(Year,Player,PER,MP,PTS,G,Pos,Pos_modern,DBPM,WS,BPM) %>%
   mutate(MPG = MP/G,
          PPG = PTS/G) %>% 
   filter(PER >= 25,
          MPG >= 25,
          Year >= 1978)
 
-#Graphs
+stats_all_1978to2017 = season_stats %>%
+  select(Year,Player,PER,MP,PTS,G,Pos,Pos_modern,DBPM,WS,BPM) %>%
+  mutate(MPG = MP/G,
+         PPG = PTS/G) %>% 
+  filter(Year >= 1978)
+
+####Graphs
 scat_PERvsDBPM = stats_25plusPER %>% 
   plot_ly(
   type = 'scatter',
   mode = 'markers',
   x = ~PER,
   y = ~DBPM,
-  marker = list(size = ~WS, sizemode = 'area'),
+  size = ~WS,
+  sizemode = 'diameter',
+  #marker = list(size = ~WS, sizemode = 'diameter'),
   color = ~Pos,
   text = ~paste(Player," - ",Year),
   hovertemplate = paste(
     "<b>%{text}</b><br><br>",
     "%{yaxis.title.text}: %{y:.00}<br>",
     "%{xaxis.title.text}: %{x:.00}<br>",
-    "Win-Shares: %{marker.size:.00}",
+    "WS: ",
+    .$WS,
+    "<br>",
     "<extra></extra>"
   )) %>%
   layout(legend = list(orientation = 'h', y = -0.3))
 
-plot_ly(
-  type = 'scatter',
-  mode = 'markers',
-  x = ~DBPM,
-  y = ~PER,
-  marker = list(size = ~WS, sizemode = 'area'),
-  color = ~Pos,
-  text = ~paste(Player," - ",Year),
-  hovertemplate = paste(
-    "<b>%{text}</b><br><br>",
-    "%{yaxis.title.text}: %{y:.00}<br>",
-    "%{xaxis.title.text}: %{x:.00}<br>",
-    "Win-Shares: %{marker.size:.00}",
-    "<extra></extra>"
-  )
-) %>%
+
+scat_PERvsBPM = stats_all_1978to2017 %>%
+  filter(G >= 30,
+         MPG >= 12) %>% 
+  plot_ly(
+    type = 'scatter',
+    mode = 'markers',
+    x = ~PER,
+    y = ~BPM,
+    marker = list(size = ~WS ,sizemode = 'area'),
+    color = ~Pos,
+    text = ~paste(Player," - ",Year),
+    hovertemplate = paste(
+      "<b>%{text}</b><br><br>",
+      "%{yaxis.title.text}: %{y:.00}<br>",
+      "%{xaxis.title.text}: %{x:.00}<br>",
+      "WS: ",
+      .$WS,
+      "<extra></extra>"
+    )) %>%
   layout(legend = list(orientation = 'h', y = -0.3))
+
 
 
 

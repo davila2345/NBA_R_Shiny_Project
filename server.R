@@ -16,11 +16,12 @@ shinyServer(function(input, output){
       scat_PERvsDBPM
     })
     
-    # show histogram using googleVis
-    output$hist = renderGvis({
-        gvisHistogram(state_stat[,input$selected, drop=FALSE])
+    #show plotly BPM vs PER
+    output$scatPERvsBPM = renderPlotly({ 
+      scat_PERvsBPM
     })
     
+
     # show data using DataTable
     output$tblSeasons = renderDataTable({
         season_stats %>% 
@@ -31,13 +32,19 @@ shinyServer(function(input, output){
     
     # show data using DataTable - just +30 PERs
     output$tbl30plusPER = renderDataTable({
-      season_stats %>% 
-        select(-X) %>%
-        filter(Year >= 1978,
-               PER >= 30,
-               MP >= 900) 
+      season_stats},
+      options = list(
+        pageLength = 25,
+        initComplete = I("function(settings, json){
+                         new $.fn.dataTable.FixedHeader(this, {
+                         left:   true,
+                         right:  true
+                         } );
+                         }"))
+      #options = list(scrollX = TRUE,
+       #              scrolly = TRUE)
         #formatStyle(input$selected, background="skyblue", fontWeight='bold')
-    })
+    )
     
     # show statistics using infoBox
     output$maxBox <- renderInfoBox({
