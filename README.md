@@ -1,2 +1,2 @@
 # NBA_R_Shiny_Project
- Exploring NBA data since 1950
+ Exploring NBA data going back to 1950
