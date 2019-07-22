@@ -173,4 +173,4 @@ intro_text = paste('<h2>The game is expanding, thanks to the evolution of smalle
                    '<br><h3>Since the introduction of the 3 point line in 1980, basketball has become more perimeter oriented. My R Shiny application contains graphics that illustrate the evolution of the 3 point shot and the increased efficiency of smaller perimeter oriented players over time.</h3>',
                    '<br><h3>The source of this dataset can be found in this <a href="https://www.kaggle.com/drgilermo/nba-players-stats/">kaggle link</a>.</h3>',
                    '<br><h3>If you want to look at my code, check out my GitHub link below.</h3>',
-                   '<br><h3>Project Github Link: <a href="https://github.com/davila2345/NBA_R_Shiny_Project</h3>">https://github.com/davila2345/NBA_R_Shiny_Project</h3></a>')
+                   '<br><h3>Project Github Link: <a href="https://github.com/davila2345/NBA_R_Shiny_Project">https://github.com/davila2345/NBA_R_Shiny_Project</a></h3>')
