@@ -120,18 +120,20 @@ season_stats = season_stats %>%
 states_usa = read.csv("states_usa.csv")
 
 
-#data subsets
-
+####data subsets
+#seasons where players had at least 25 PER, 25 MPG, on or after year 1978
 stats_25plusPER = season_stats %>%
   filter(PER >= 25,
          MPG >= 25,
          Year >= 1978) %>% 
   inner_join(players_df, by = "Player")
 
+#all stats from 1978 (first year Turn-overs were tracked) to 2017 plus additional player data such as height
 stats_all_1978to2017 = season_stats %>%
   filter(Year >= 1978) %>% 
   inner_join(players_df, by = "Player")
 
+#summarizes total distibution of shots by year
 seasons_distro_shots = season_stats %>% 
   group_by(Year) %>% 
   summarise(tot_3PM = sum(X3P),
@@ -144,6 +146,8 @@ seasons_distro_shots = season_stats %>%
             avg_2PAR = tot_2PA/tot_FGA,
             avg_3Prcnt = mean(X3P.))
 
+#top 10 PER leaders from each year since 1978, plus height data. 
+#Made sure to filter for players that played at least 1000 minutes. 
 top10PER_PerSeason = season_stats %>% 
   arrange(desc(PER)) %>% 
   group_by(Year) %>%
@@ -151,7 +155,8 @@ top10PER_PerSeason = season_stats %>%
   slice(1:10) %>% 
   inner_join(players_df, by = "Player")
 
-
+#top 10 PER leaders grouped by position each year since 1978, plust height data.
+#same filters as above apply.
 top10PER_PerSeason_byPos = season_stats %>% 
   arrange(desc(PER)) %>% 
   group_by(Year,Pos_modern) %>%
@@ -160,61 +165,12 @@ top10PER_PerSeason_byPos = season_stats %>%
   inner_join(players_df, by = "Player")
 
 
-
-####Graphs
-
-ggplotly(
-  stats_all_1978to2017 %>% 
-    filter(G >= 30,
-           MPG >= 24,
-           PER >= 20) %>%
-    ggplot(aes(x = round(height_inches,0), y = PER, color = .$Pos_modern)) +
-      geom_point() + theme_tufte() + 
-      labs(title = "Players with 20+ PER by Height", x = 'Height (inches)') +
-      theme(legend.title = element_blank(), legend.position = "bottom")
-)
-
-ggplotly(
-  p = (stats_all_1978to2017 %>% 
-      filter(G >= 30,
-             MPG >= 24,
-             PER >= 20) %>%
-      ggplot(aes(x = round(height_inches,0), fill = .$Pos_modern)) +
-      geom_bar() + theme_tufte() + labs(title = "Seasons with 20+ PER by Player Height"))#,
-  #tooltip = paste(~Player," - ",~Year,"<br>","TEST")
-)
-
-ggplotly(
-  top10PER_PerSeason %>%
-    ggplot(aes(x = Year, fill = Pos_modern, order = Pos_modern)) + geom_bar() + theme_tufte() + 
-    labs(title = "Distribution of Top 10 PER each season by Position") +
-    theme(legend.title = element_blank())
-)
-
-ggplotly(
-  seasons_distro_shots %>% 
-  ggplot(aes(x = Year)) + 
-    geom_line(aes(y = avg_3PAR, color = "TOT 3PA")) +
-    geom_line(aes(y = avg_2PAR, color = "TOT 2PA")) +
-    theme_tufte() + xlab("") + ylab("") +
-    theme(legend.title = element_blank()) +
-    labs(title = "The rate of 3 point attempts has been rising since 1980")
-    
-    
-)
-
-# convert matrix to dataframe
-state_stat <- data.frame(state.name = rownames(state.x77), state.x77)
-# remove row names
-rownames(state_stat) <- NULL
-# create variable with colnames as choice
-choice <- colnames(state_stat)[-1]
-
-
+#photo of me :)
 photo_me = "./DannyMedium.jpeg"
 
-intro_text = paste("<h1>The game is expanding, thanks to the evolution of smaller players and the 3 point shot</h1>",
-                   "<br>Since the introduction of the 3 point line in 1980, basketball has become more perimeter oriented. My R Shiny application contains graphics that illustrate the evolution of the 3 point shot and the increased efficiency of smaller perimeter oriented players over time.",
-                   "<br>I explored the dataset provided in this kaggle link(https://www.kaggle.com/drgilermo/nba-players-stats/), which shows individual player regular season statistics since 1950.",
-                   "<br>See links below. GitHub link contains all R code files, which illustrates use of ggplot2, dplyr, plotly, and shiny libraries among others. R Shiny link is also provided below.",
-                   "<br>R Shiny App Link: https://davila2345.shinyapps.io/shiny_nba/ Project Github Link: https://github.com/davila2345/NBA_R_Shiny_Project")
+#intro html text
+intro_text = paste('<h2>The game is expanding, thanks to the evolution of smaller players and the 3 point shot</h2>',
+                   '<br><h3>Since the introduction of the 3 point line in 1980, basketball has become more perimeter oriented. My R Shiny application contains graphics that illustrate the evolution of the 3 point shot and the increased efficiency of smaller perimeter oriented players over time.</h3>',
+                   '<br><h3>The source of this dataset can be found in this <a href="https://www.kaggle.com/drgilermo/nba-players-stats/">kaggle link</a>.</h3>',
+                   '<br><h3>If you want to look at my code, check out my GitHub link below.</h3>',
+                   '<br><h3>Project Github Link: <a href="https://github.com/davila2345/NBA_R_Shiny_Project</h3>">https://github.com/davila2345/NBA_R_Shiny_Project</h3></a>')

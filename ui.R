@@ -12,6 +12,7 @@ shinyUI(dashboardPage(
             menuItem("Intro", tabName = "about", icon = icon("book")),
             menuItem("Evolution of 3PTers", tabName = "tab3PA", icon = icon("calendar")),  
             menuItem("PER vs Height", tabName = "tabPervsHeight", icon = icon("bar-chart-o")),
+            menuItem("Top PERs by Position", tabName = "tabDistroPER", icon = icon("bar-chart-o")),
             menuItem("Data", tabName = "data", icon = icon("database"))
         )#,
         #selectizeInput("selected",
@@ -45,7 +46,7 @@ shinyUI(dashboardPage(
                                 min = 1978, max = 2017,
                                 value = c(1978,2017),
                                 sep = "",
-                                animate = animationOptions(interval = 10, loop = TRUE))
+                                animate = animationOptions(interval = 1000, loop = TRUE))
                     , width = 12)
               ),
               fluidRow(
@@ -65,6 +66,20 @@ shinyUI(dashboardPage(
               fluidRow(
                 box(plotlyOutput("scatPERvsHeight"),width = 6),
                 box(plotlyOutput("barPERvsHeight"),width = 6)
+              )
+            ),
+            
+            tabItem(
+              tabName = "tabDistroPER",
+              fluidRow(
+                box(sliderInput("Seasons2", "Seasons",
+                                min = 1978, max = 2017,
+                                value = c(1978,2017),
+                                sep = ""), width = 12)
+              ),
+              fluidRow(
+                box(plotlyOutput("barTop10PER_byPos"),width = 6),
+                box(plotlyOutput("scatTop10PER_byPos"),width = 6)
               )
             ),
             

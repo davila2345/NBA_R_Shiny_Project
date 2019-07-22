@@ -1,16 +1,13 @@
-library(DT)
-library(shiny)
-library(googleVis)
 
 shinyServer(function(input, output){
     
-  
+  #scatter plot of 20+ PER seasons vs players' 3 point attempts
   output$rndr_scat_PERvs3PA = renderPlotly({ 
     sub_data = stats_all_1978to2017 %>%
       filter(G >= 30,
              MPG >= 24,
              PER >= 20) %>% 
-      subset(.,Year >= input$Seasons[1] & Year <= input$Seasons[2])
+      subset(.,Year >= input$anim_Seasons[1] & Year <= input$anim_Seasons[2])
     
     sub_data %>%  
       plot_ly(
@@ -35,7 +32,7 @@ shinyServer(function(input, output){
   
   
   
-  #show plotly Seasons w. 20+ PER by Player Height
+  #scatter plot of Seasons w. 20+ PER by Player Height
   output$scatPERvsHeight = renderPlotly({
     sub_data = stats_all_1978to2017 %>%
       filter(G >= 30,
@@ -45,7 +42,12 @@ shinyServer(function(input, output){
     
     ggplotly(
       sub_data %>%
-        ggplot(aes(x = round(height_inches,0), y = PER, color = .$Pos_modern)) +
+        ggplot(aes(x = round(height_inches,0), 
+                   y = PER, 
+                   color = .$Pos_modern, 
+                   text = paste(Player," - ", Year)
+                   )
+              ) +
         geom_point() + theme_tufte() + 
         labs(title = "Players with 20+ PER by Height", x = 'Height (inches)') +
         theme(legend.title = element_blank(), legend.position = "bottom")
@@ -53,7 +55,7 @@ shinyServer(function(input, output){
   })
   
   
-  #show plotly Seasons w. 20+ PER by Player Height
+  #bar chart of Seasons w. 20+ PER by Player Height
   output$barPERvsHeight = renderPlotly({ 
     sub_data = stats_all_1978to2017 %>%
       filter(G >= 30,
@@ -70,7 +72,7 @@ shinyServer(function(input, output){
              title = paste("Players with 20+ PER from",input$Seasons[1]," - ",input$Seasons[2],"by Height")))
   })
   
-
+  #Bar chart showing distribution of top 10 PER every season by Position
   output$barTop10PER_byPos = renderPlotly({
     ggplotly(
       top10PER_PerSeason %>%
@@ -80,7 +82,36 @@ shinyServer(function(input, output){
     )
   })
   
+  #scatter plot of 20+ PER seasons vs players' 3 point attempts
+  output$scatTop10PER_byPos = renderPlotly({ 
+    sub_data_top10 = top10PER_PerSeason %>%
+      subset(.,Year >= input$Seasons2[1] & Year <= input$Seasons2[2])
+    
+    sub_data_top10 %>%  
+      plot_ly(
+        type = 'scatter',
+        mode = 'markers',
+        x = ~Year,
+        y =~PER, 
+        #size = ~height_inches,
+        marker = list(size = ~WS,sizemode = 'area'),
+        color = ~Pos_modern,
+        text = ~paste(Player," - ",Year),
+        hovertemplate = paste(
+          "<b>%{text}</b><br><br>",
+          "%{xaxis.title.text}: %{x:.00}<br>",
+          "%{yaxis.title.text}: %{y:.00}<br>",
+          "3PT%: ",
+          .$X3P.*100,
+          "<extra></extra>"
+        )) %>%
+      layout(title = "Top 10 PER each season: player points",legend = list(orientation = 'h', y = -0.3))
+  })
+  
+  
+  #line graph showing rate of 3 point shots taken since 1980, the year the 3pt line was instituted in NBA
   output$line_3ptRate = renderPlotly({
+    
     ggplotly(
       seasons_distro_shots %>% 
         ggplot(aes(x = Year)) + 
@@ -118,22 +149,5 @@ shinyServer(function(input, output){
       #formatStyle(input$selected, background="skyblue", fontWeight='bold')
   )
   
-  # show statistics using infoBox
-  output$maxBox <- renderInfoBox({
-      max_value <- max(state_stat[,input$selected])
-      max_state <- 
-          state_stat$state.name[state_stat[,input$selected] == max_value]
-      infoBox(max_state, max_value, icon = icon("hand-o-up"))
-  })
-  output$minBox <- renderInfoBox({
-      min_value <- min(state_stat[,input$selected])
-      min_state <- 
-          state_stat$state.name[state_stat[,input$selected] == min_value]
-      infoBox(min_state, min_value, icon = icon("hand-o-down"))
-  })
-  output$avgBox <- renderInfoBox(
-      infoBox(paste("AVG.", input$selected),
-              mean(state_stat[,input$selected]), 
-              icon = icon("calculator"), fill = TRUE))
-
+ 
 })
