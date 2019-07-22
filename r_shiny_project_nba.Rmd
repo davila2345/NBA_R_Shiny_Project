@@ -1,0 +1,17 @@
+---
+title: "R Shiny NBA Project"
+author: "Daniel Avila"
+date: "July 21, 2019"
+output: html_document
+---
+
+## The game is expanding, thanks to the evolution of smaller players and the 3 point shot
+
+I explored the dataset provided in this kaggle link(https://www.kaggle.com/drgilermo/nba-players-stats/), which shows individual player regular season statistics since 1950.
+
+Since the introduction of the 3 point line in 1980, basketball has become more perimeter oriented. My R Shiny application contains graphics that illustrate the evolution of the 3 point shot and the increased efficiency of smaller perimeter oriented players over time.
+
+R Shiny App Link: https://davila2345.shinyapps.io/shiny_nba/
+Project Github Link: https://github.com/davila2345/NBA_R_Shiny_Project
+
+
